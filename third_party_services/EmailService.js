@@ -16,16 +16,17 @@ const transporter = nodemailer.createTransport({
 });
 export const sendVerificationEmail = async (useremail, otp) => {
   try {
-    const render = await ejs.renderFile(
-      "https://drive.google.com/file/d/1L9IrWPRcsZ2iTpn0LWteSQ3fyypLeRHW/view?usp=sharing",
-      { email: useremail, otp: otp }
-    );
+    // const render = await ejs.renderFile(
+    //   "https://drive.google.com/file/d/1L9IrWPRcsZ2iTpn0LWteSQ3fyypLeRHW/view?usp=sharing",
+    //   { email: useremail, otp: otp }
+    // );
     if (!render) throw new Error("Something went wrong");
     let mainOptions = {
       from: '"Bibhas" bibhas.ash@graffersid.com',
       to: useremail,
       subject: "Verify Your Email",
-      html: render,
+      html: `<h5>${useremail} Here's your One Time Password to verify your account.<h5>
+      <p>${otp}</p>`,
     };
 
     transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
@@ -38,16 +39,17 @@ export const sendVerificationEmail = async (useremail, otp) => {
 
 export const sendForgotPasswordEmail = async (useremail, otp) => {
     try {
-        const render = await ejs.renderFile(
-          "https://drive.google.com/file/d/1iXdVrfJFQZnRhrK3xjypp2VJ0-PlgMu9/view?usp=sharing",
-          { email: useremail, otp: otp }
-        );
+        // const render = await ejs.renderFile(
+        //   "https://drive.google.com/file/d/1iXdVrfJFQZnRhrK3xjypp2VJ0-PlgMu9/view?usp=sharing",
+        //   { email: useremail, otp: otp }
+        // );
         if (!render) throw new Error("Something went wrong");
         let mainOptions = {
           from: '"Bibhas" bibhas.ash@graffersid.com',
           to: useremail,
           subject: "Forgot Password Email",
-          html: render,
+          html: `<h5>${useremail} Here's your One Time Password to verify your account.<h5>
+                 <p>${otp}</p>`,
         };
     
         transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
