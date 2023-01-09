@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationEmail = async (useremail, otp) => {
   try {
     const render = await ejs.renderFile(
-      "mails/verification-email.ejs",
+      "../views/mails/password-reset-email.ejs",
       { email: useremail, otp: otp }
     );
     if (!render) throw new Error("Something went wrong");
@@ -39,7 +39,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
 export const sendForgotPasswordEmail = async (useremail, otp) => {
     try {
         const render = await ejs.renderFile(
-          "mails/password-reset-email.ejs",
+          "../views/mails/password-reset-email.ejs",
           { email: useremail, otp: otp }
         );
         if (!render) throw new Error("Something went wrong");
