@@ -1,5 +1,6 @@
 import express from 'express'
 import db from './config/db.js'
+import ejs from 'ejs'
 import api from './routes/api.js'
 import dotenv from 'dotenv'
 import cors from 'cors'
@@ -10,6 +11,7 @@ dotenv.config()
 const port = process.env.PORT || 4000
 const app = express()
 
+app.set('view-engine',ejs)
 app.use(helmet());
 app.use(cookieParser())
 app.use(express.static( "public" ) );
