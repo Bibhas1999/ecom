@@ -44,6 +44,7 @@ class AuthController {
         }
       
     } catch (error) {
+      console.log(error)
       if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       return res.status(500).json({user:{},msg:"Something went wrong while logging in!",status:500,type:'error'}) 
@@ -104,17 +105,27 @@ class AuthController {
   }
 
  static verifyAccount = async (req,res)=>{
+
+  try {
     const {email,otp} = req.body
-    if(!email) return res.status(400).json({ msg: "Email is required",status:400,type:"error" });
-    if(!otp) return res.json({ msg: "OTP is required",status:400,type:"error" });
+    if(!email) throw new ValidationError("Email is required")
+    if(!otp) throw new ValidationError("OTP is required")
     let user = await User.findOne({email:email})
-    if(!user)return res.status(404).json({msg:"User Not Found",status:404,type:"error"})
-    if(user.verified) return res.status(400).json({msg:"Account already verified", status:400,type:"error"})
+
+    if(!user)throw new HTTPError("User account doesn't exists",404)
+    if(user.verified)throw new HTTPError("Account already verified",400)
     if(await bcrypt.compare(String(otp),user.otp)){
       await User.updateOne({email:email},{otp:"",verified:true})
       return res.status(200).json({msg:"Account verified successfully", status:200, type:'success'})
+    }else{
+      throw new HTTPError("OTP is invalid",400)
     }
-    return res.status(400).json({msg:"OTP is Invalid",status:400,type:"success"})
+  } catch (error) {
+    console.log(error);
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while verifying account!",status:500,type:'error'}) 
+  }
  }
 
  static resendOTP = async (req,res)=>{
