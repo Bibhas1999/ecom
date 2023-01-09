@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationEmail = async (useremail, otp) => {
   try {
     const render = await ejs.renderFile(
-      "./verification-email.ejs",
+      "https://drive.google.com/file/d/1L9IrWPRcsZ2iTpn0LWteSQ3fyypLeRHW/view?usp=sharing",
       { email: useremail, otp: otp }
     );
     if (!render) throw new Error("Something went wrong");
@@ -39,7 +39,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
 export const sendForgotPasswordEmail = async (useremail, otp) => {
     try {
         const render = await ejs.renderFile(
-          "./password-reset-email.ejs",
+          "https://drive.google.com/file/d/1iXdVrfJFQZnRhrK3xjypp2VJ0-PlgMu9/view?usp=sharing",
           { email: useremail, otp: otp }
         );
         if (!render) throw new Error("Something went wrong");
