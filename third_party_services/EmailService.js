@@ -20,7 +20,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
     //   "https://drive.google.com/file/d/1L9IrWPRcsZ2iTpn0LWteSQ3fyypLeRHW/view?usp=sharing",
     //   { email: useremail, otp: otp }
     // );
-    if (!render) throw new Error("Something went wrong");
+    // if (!render) throw new Error("Something went wrong");
     let mainOptions = {
       from: '"Bibhas" bibhas.ash@graffersid.com',
       to: useremail,
@@ -43,7 +43,7 @@ export const sendForgotPasswordEmail = async (useremail, otp) => {
         //   "https://drive.google.com/file/d/1iXdVrfJFQZnRhrK3xjypp2VJ0-PlgMu9/view?usp=sharing",
         //   { email: useremail, otp: otp }
         // );
-        if (!render) throw new Error("Something went wrong");
+        // if (!render) throw new Error("Something went wrong");
         let mainOptions = {
           from: '"Bibhas" bibhas.ash@graffersid.com',
           to: useremail,
