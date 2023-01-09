@@ -31,9 +31,11 @@ class AuthController {
              })
             return res.status(200).json({
               msg:'Login Successful',
-              _id: user._id,
-              name: user.name,
-              email: user.email,   
+              user:{
+                _id: user._id,
+                name: user.name,
+                email: user.email,  
+              },
               status: 200,
               type:'success'
           });
@@ -42,9 +44,9 @@ class AuthController {
         }
       
     } catch (error) {
-      if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
-      if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
-      return res.status(500).json({msg:"Something went wrong while logging in!",status:500,type:'error'}) 
+      if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({user:{},msg:"Something went wrong while logging in!",status:500,type:'error'}) 
     }
   };
 
@@ -64,18 +66,22 @@ class AuthController {
           });
           sendVerificationEmail(email,otp)
           await user.save();
-          const id = user._id
-          const token = jwt.sign({id},process.env.JWT_SECRET_KEY,{
-            expiresIn:'2h'
-         })
-         var oneWeek = 7 * 24 * 3600 * 1000
-         res.cookie("jwtoken",token,{
-          expires: new Date(Date.now() + oneWeek),
-          httpOnly:true,
-          sameSite:'none',
-          secure:true
-         })       
-          return res.status(200).json({ msg: "Registration Successfull. An OTP has been sent to your email address for verification.",_id:user.id,name:user.name,email:user.email, status:200, type:"success"})
+        //   const id = user._id
+        //   const token = jwt.sign({id},process.env.JWT_SECRET_KEY,{
+        //     expiresIn:'2h'
+        //  })
+        //  var oneWeek = 7 * 24 * 3600 * 1000
+        //  res.cookie("jwtoken",token,{
+        //   expires: new Date(Date.now() + oneWeek),
+        //   httpOnly:true,
+        //   sameSite:'none',
+        //   secure:true
+        //  })       
+          return res.status(200).json({ msg: "Registration Successfull. An OTP has been sent to your email address for verification.",user:{
+            _id: user._id,
+            name: user.name,
+            email: user.email,  
+          }, status:200, type:"success"})
         }else{
           throw new HTTPError('Email already registered',400)
         }
