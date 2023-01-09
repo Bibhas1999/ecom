@@ -54,6 +54,8 @@ class AuthController {
   static register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        const token = req.cookies.jwtoken
+        if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
         const result = await User.findOne({ email: email });
         if (!result) {
           let otp = generateOtp()

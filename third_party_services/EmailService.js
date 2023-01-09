@@ -16,8 +16,9 @@ const transporter = nodemailer.createTransport({
 });
 export const sendVerificationEmail = async (useremail, otp) => {
   try {
+    
     // const render = await ejs.renderFile(
-    //   "https://drive.google.com/file/d/1L9IrWPRcsZ2iTpn0LWteSQ3fyypLeRHW/view?usp=sharing",
+    //   "./views/mails/verification-email.ejs",
     //   { email: useremail, otp: otp }
     // );
     // if (!render) throw new Error("Something went wrong");
@@ -25,8 +26,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
       from: '"Bibhas" bibhas.ash@graffersid.com',
       to: useremail,
       subject: "Verify Your Email",
-      html: `<h1>${useremail} Here's your One Time Password to verify your account.<h1>
-      <h2>${otp}</h2>`,
+      html: `<h2>Hii ${useremail}, <br> here is One Time Password ${otp} to verify your account </h2>`, 
     };
 
     transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
@@ -40,7 +40,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
 export const sendForgotPasswordEmail = async (useremail, otp) => {
     try {
         // const render = await ejs.renderFile(
-        //   "https://drive.google.com/file/d/1iXdVrfJFQZnRhrK3xjypp2VJ0-PlgMu9/view?usp=sharing",
+        //   "./views/mails/password-reset-email.ejs",
         //   { email: useremail, otp: otp }
         // );
         // if (!render) throw new Error("Something went wrong");
@@ -48,8 +48,7 @@ export const sendForgotPasswordEmail = async (useremail, otp) => {
           from: '"Bibhas" bibhas.ash@graffersid.com',
           to: useremail,
           subject: "Forgot Password Email",
-          html: `<h1>${useremail} Here's your One Time Password to verify your account.<h1>
-          <h2>${otp}</h2>`,
+          html:`<h2>Hii ${useremail}, <br> here is One Time Password ${otp} to verify your account </h2>`,
         };
     
         transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
