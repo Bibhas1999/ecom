@@ -141,7 +141,8 @@ class AuthController {
     let user = await User.findOne({email:email})
     if(!user)throw new HTTPError("User account doesn't exists",404)
     if(user.reset_verified)throw new HTTPError("Account already verified for resetting password you can now reset password",400)
-    if(await bcrypt.compare(String(otp),user.otp)){
+    // if(await bcrypt.compare(String(otp),user.otp)){
+     if(otp == user.otp){
       await User.updateOne({email:email},{otp:"",reset_verified:true})
       return res.status(200).json({msg:"Account verified successfully for resetting password", status:200, type:'success'})
     }else{
@@ -212,7 +213,7 @@ class AuthController {
     if(!user) return res.status(404).json({msg:'User Not Found!', status:404,type:"error"})
     let otp = generateOtp();
     let hashedOTP = bcrypt.hashSync(String(otp), 10);
-    let updated = await User.updateOne({email:email},{otp:hashedOTP,reset_verified:false})
+    let updated = await User.updateOne({email:email},{otp:otp,reset_verified:false})
     if(updated){
      try {
       await sendForgotPasswordEmail(email,otp)
