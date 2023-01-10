@@ -23,10 +23,10 @@ export const sendVerificationEmail = async (useremail, otp) => {
     // );
     // if (!render) throw new Error("Something went wrong");
     let mainOptions = {
-      from: '"Bibhas" bibhas.ash@graffersid.com',
+      from: '"Bibhas Ash" bibhas.ash@graffersid.com',
       to: useremail,
       subject: "Verify Your Email",
-      html: `<h2>Hii ${useremail}, <br> here is One Time Password ${otp} to verify your account </h2>`, 
+      html: `<h2>Hii ${useremail}, <br> Here is One Time Password ${otp} to verify your account </h2>`, 
     };
 
     transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
@@ -48,7 +48,7 @@ export const sendForgotPasswordEmail = async (useremail, otp) => {
           from: '"Bibhas" bibhas.ash@graffersid.com',
           to: useremail,
           subject: "Forgot Password Email",
-          html:`<h2>Hii ${useremail}, <br> here is One Time Password ${otp} to verify your account </h2>`,
+          html:`<h2>Hii ${useremail}, <br> Here is One Time Password ${otp} to verify your account </h2>`,
         };
     
         transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))

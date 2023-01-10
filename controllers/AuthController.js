@@ -12,6 +12,8 @@ class AuthController {
   static login = async (req, res) => {
     try {
       const { email, password } = req.body;
+      const token = req.cookies.jwtoken
+      if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
       if(!email) throw new ValidationError('Email is required')
       if(!password) throw new ValidationError('Password is required')
 
@@ -130,8 +132,61 @@ class AuthController {
   }
  }
 
+ static verifyResetOtp = async (req,res)=>{
+
+  try {
+    const {email,otp} = req.body
+    if(!email) throw new ValidationError("Email is required")
+    if(!otp) throw new ValidationError("OTP is required")
+    let user = await User.findOne({email:email})
+    if(!user)throw new HTTPError("User account doesn't exists",404)
+    if(user.reset_verified)throw new HTTPError("Account already verified for resetting password you can now reset password",400)
+    if(await bcrypt.compare(String(otp),user.otp)){
+      await User.updateOne({email:email},{otp:"",reset_verified:true})
+      return res.status(200).json({msg:"Account verified successfully for resetting password", status:200, type:'success'})
+    }else{
+      throw new HTTPError("OTP is invalid",400)
+    }
+  } catch (error) {
+    console.log(error);
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while verifying account!",status:500,type:'error'}) 
+  }
+ }
+
  static resendOTP = async (req,res)=>{
-    const {email} = req.body
+  try {
+    const {email , type} = req.body
+    if(!email) throw new ValidationError("Email is required")
+    if(!type) throw new ValidationError("Type must be specified")
+    // if(type !=="va" || type !=="rp") throw new ValidationError("Invalid type!.Type must be either 'va' for verifying account or 'rp' for reset password")
+    if(typeof type !=="string") throw new ValidationError("Type must be a string")
+    let user = await User.findOne({email:email})
+    if(!user) throw new HTTPError("User doesn't exists",404)
+    let otp = generateOtp();
+    if(type == "va"){
+      if(user.verified) throw new ValidationError("Account already verified")
+         await sendVerificationEmail(email,otp)
+        let hashedOTP = bcrypt.hashSync(String(otp), 10);
+        let updated = await User.updateOne({email:email},{otp:hashedOTP})
+      if(!updated) throw("Something went wrong")
+      return res.status(200).json({msg:'OTP Resent for verifying account',status:200,type:"success"})
+      }else if(type == "rp"){
+        if(user.reset_verified) throw new ValidationError("Account already verified")
+         await sendForgotPasswordEmail(email,otp)
+        let hashedOTP = bcrypt.hashSync(String(otp), 10);
+        let updated = await User.updateOne({email:email},{otp:hashedOTP})
+      if(!updated) throw("Something went wrong")
+     return res.status(200).json({msg:'OTP Resent for reset password',status:200,type:"success"})
+      }
+  } catch (error) {
+    console.log(error);
+    if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    return res.status(500).json({msg:"Something went wrong while verifying account!",status:500,type:'error'}) 
+  }
+    const {email , type} = req.body
     if(!email) return res.status(400).json({msg:"Email id is required to send otp",status:400,type:"error"})
     let user = await User.findOne({email:email})
     if(!user) return res.status(404).json({msg:"User Not Found", status:404, type:"error"})
@@ -157,33 +212,40 @@ class AuthController {
     if(!user) return res.status(404).json({msg:'User Not Found!', status:404,type:"error"})
     let otp = generateOtp();
     let hashedOTP = bcrypt.hashSync(String(otp), 10);
-    let updated = await User.updateOne({email:email},{otp:hashedOTP,verified:false})
+    let updated = await User.updateOne({email:email},{otp:hashedOTP,reset_verified:false})
     if(updated){
      try {
-      sendForgotPasswordEmail(email,otp)
+      await sendForgotPasswordEmail(email,otp)
      } catch (error) {
       return res.status(500).json({msg:"Something went wrong while sending email. Try resending request to get an OTP",status:500,type:"error"})
      } 
     
     res.status(200).json({msg:'An OTP has been sent to your email address.',status:200,type:"success"})
-    }else {res.status(500).json({msg:"Something Went Wrong",status:500,type:"error"})}
+    }else {res.status(500).json({msg:"Something Went Wrong while sending sending forgot password mail.",status:500,type:"error"})}
  }
 
  static resetPasswordVerify = async (req,res) =>{
-  const {email,otp, new_password, retyped} = req.body
-  if(!email)return res.status(400).json({msg:"Email is required",type:"error",status:400})
-  if(!new_password)return res.status(400).json({msg:"New password is required",type:"error",status:400})
-  if(!retyped)return res.status(400).json({msg:"Need to retype new password",type:"error",status:400})
-  if(!otp)return res.status(400).json({msg:"OTP is required",type:"error",status:400})
-  if(new_password !== retyped)return res.status(400).json({msg:"New Password and Confirm password doesn't match",type:"error",status:400})
-  let user = await User.findOne({email:email})
-  if(!user)return res.status(404).json({msg:"User doesn't exists",type:"error",status:404})
-  if(await bcrypt.compare(new_password,user.password))return res.status(400).json({msg:"New password can't be one of your old passwords",type:"error",status:400})
-  if(await bcrypt.compare(String(otp),user.otp) == false)return res.status(400).json({msg:"Invalid OTP",type:"error",status:400})
-  let hashedPassword = bcrypt.hashSync(new_password, 10);
-  let updated = await User.updateOne({email:email},{password:hashedPassword,otp:"",verified:true})
-  if(!updated)return res.status(500).json({msg:"Something went wrong while updating password",type:"error",status:500})
-  return res.status(201).json({msg:"Password reset successful",type:"success",status:201})
+
+  try {
+    const {email, new_password, retyped} = req.body
+    if(!email) throw new ValidationError('Email is required')
+    if(!new_password) throw new ValidationError('Password is required')
+    if(!retyped) throw new ValidationError('Password is required')
+    if(new_password !== retyped) throw new ValidationError("Passwords didn't match")
+    let user = await User.findOne({email:email})
+    if(!user)throw new HTTPError("User doesn't exists",404)
+    if(await bcrypt.compare(new_password,user.password)) throw new ValidationError("New password can't be one of your old passwords")
+    if(user.reset_verified == false) throw new ValidationError("It seems your account is not verified. Please verify your account with otp for changing password.")
+    let hashedPassword = bcrypt.hashSync(new_password, 10);
+    let updated = await User.updateOne({email:email},{password:hashedPassword,otp:"",reset_verified:true})
+    if(!updated)throw('Something went wrong')
+    return res.status(201).json({msg:"Password reset successful",type:"success",status:201})
+  } catch (error) {
+    console.log(error);
+    if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    return res.status(500).json({msg:"Something went wrong while reseting password",status:500,type:'error'}) 
+  }
  }
    
 }
