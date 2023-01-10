@@ -28,7 +28,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
       subject: "Verify Your Email",
       html: `<h2>Hii ${useremail}, <br> Here is One Time Password ${otp} to verify your account </h2>`, 
     };
-
+    
     transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
     
   } catch (error) {
@@ -51,10 +51,11 @@ export const sendForgotPasswordEmail = async (useremail, otp) => {
           html:`<h2>Hii ${useremail}, <br> Here is One Time Password ${otp} to verify your account </h2>`,
         };
     
-        transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
-        
+        let response = await transporter.sendMail(mainOptions)
+        return response
+
       } catch (error) {
-        console.log(error)
+        console.log("ff"+error)
         return error;
       } 
 };

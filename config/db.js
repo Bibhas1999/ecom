@@ -14,6 +14,7 @@ const db_prefix = process.env.DB_URL_PREFIX
 
 const db_url = `${db_prefix}://${db_user}:${db_pass}@${db_cluster0}:${db_port},${db_cluster1}:${db_port},${db_cluster2}:${db_port}/${db_name}?replicaSet=${db_replica_set}&ssl=${db_ssl}&authSource=admin`
 // const db_url = 'mongodb://127.0.0.1/db_api'
+mongoose.set('strictQuery',false)
 mongoose.connect(db_url, { useNewUrlParser: true,useUnifiedTopology: true }, (err) => {
   if (!err) {
     console.log('MongoDB connected successfully');

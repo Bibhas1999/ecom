@@ -6,6 +6,7 @@ import HTTPError from "../ErrorHandlers/HTTPExceptions.js";
 import ValidationError from "../ErrorHandlers/ValidationExceptions.js";
 import { sendForgotPasswordEmail, sendVerificationEmail } from "../third_party_services/EmailService.js";
 import { generateOtp } from "./middlewares/auth_middleware.js";
+import nodemailer from "nodemailer";
 dotenv.config()
 class AuthController {
     
@@ -62,14 +63,15 @@ class AuthController {
         if (!result) {
           let otp = generateOtp()
           let hashedPassword = bcrypt.hashSync(password, 10);
-          let hashedOTP = bcrypt.hashSync(String(otp), 10);
+          // let hashedOTP = bcrypt.hashSync(String(otp), 10);
+          await sendVerificationEmail(email,otp)
           const user = new User({
             name: name,
             email: email,
             password: hashedPassword,
-            otp:hashedOTP
+            otp:otp
           });
-          sendVerificationEmail(email,otp)
+          
           await user.save();
         //   const id = user._id
         //   const token = jwt.sign({id},process.env.JWT_SECRET_KEY,{
@@ -115,10 +117,10 @@ class AuthController {
     if(!email) throw new ValidationError("Email is required")
     if(!otp) throw new ValidationError("OTP is required")
     let user = await User.findOne({email:email})
-
     if(!user)throw new HTTPError("User account doesn't exists",404)
     if(user.verified)throw new HTTPError("Account already verified",400)
-    if(await bcrypt.compare(String(otp),user.otp)){
+    // if(await bcrypt.compare(String(otp),user.otp)){
+    if(otp == user.otp){
       await User.updateOne({email:email},{otp:"",verified:true})
       return res.status(200).json({msg:"Account verified successfully", status:200, type:'success'})
     }else{
@@ -169,15 +171,15 @@ class AuthController {
     if(type == "va"){
       if(user.verified) throw new ValidationError("Account already verified")
          await sendVerificationEmail(email,otp)
-        let hashedOTP = bcrypt.hashSync(String(otp), 10);
-        let updated = await User.updateOne({email:email},{otp:hashedOTP})
+        // let hashedOTP = bcrypt.hashSync(String(otp), 10);
+      let updated = await User.updateOne({email:email},{otp:otp})
       if(!updated) throw("Something went wrong")
       return res.status(200).json({msg:'OTP Resent for verifying account',status:200,type:"success"})
       }else if(type == "rp"){
         if(user.reset_verified) throw new ValidationError("Account already verified")
          await sendForgotPasswordEmail(email,otp)
-        let hashedOTP = bcrypt.hashSync(String(otp), 10);
-        let updated = await User.updateOne({email:email},{otp:hashedOTP})
+        // let hashedOTP = bcrypt.hashSync(String(otp), 10);
+        let updated = await User.updateOne({email:email},{otp:otp})
       if(!updated) throw("Something went wrong")
      return res.status(200).json({msg:'OTP Resent for reset password',status:200,type:"success"})
       }
@@ -187,42 +189,28 @@ class AuthController {
     if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
     return res.status(500).json({msg:"Something went wrong while verifying account!",status:500,type:'error'}) 
   }
-    const {email , type} = req.body
-    if(!email) return res.status(400).json({msg:"Email id is required to send otp",status:400,type:"error"})
-    let user = await User.findOne({email:email})
-    if(!user) return res.status(404).json({msg:"User Not Found", status:404, type:"error"})
-    if(user.verified)return res.status(400).json({msg:"Your account is already verified",status:400,type:"error"})
-    let otp = generateOtp();
-    let hashedOTP = bcrypt.hashSync(String(otp), 10);
-    let updated = await User.updateOne({email:email},{otp:hashedOTP})
-    if(updated){
-      try {
-        sendVerificationEmail(email,otp)
-      } catch (error) {
-        return res.status(500).json({msg:"Something went wrong while sending email. Please try again",status:500,type:"error"})
-      }
-    
-    res.status(200).json({msg:'OTP Resent',status:200,type:"success"})
-    }else {res.status(500).json({msg:"Something Went Wrong",status:500,type:"error"})}
  }
 
  static forgotPassword = async (req,res) =>{
+
+  try {
     const {email} = req.body
-    if(!email) return res.status(400).json({msg:'Email id is required', status:400,type:"error"})
+    if(!email)throw new ValidationError("Email is required")
     let user = await User.findOne({email:email})
-    if(!user) return res.status(404).json({msg:'User Not Found!', status:404,type:"error"})
+    if(!user) throw new HTTPError("User doesn't exists!",404)
     let otp = generateOtp();
-    let hashedOTP = bcrypt.hashSync(String(otp), 10);
+    let hashedOTP = bcrypt.hashSync(otp, 10);
+    let sent = await sendForgotPasswordEmail(email,otp)
+    // if(!sent?.messageId) throw new HTTPError("Something went wrong while sending email",500)
+    console.log(sent)
     let updated = await User.updateOne({email:email},{otp:otp,reset_verified:false})
-    if(updated){
-     try {
-      await sendForgotPasswordEmail(email,otp)
-     } catch (error) {
-      return res.status(500).json({msg:"Something went wrong while sending email. Try resending request to get an OTP",status:500,type:"error"})
-     } 
-    
-    res.status(200).json({msg:'An OTP has been sent to your email address.',status:200,type:"success"})
-    }else {res.status(500).json({msg:"Something Went Wrong while sending sending forgot password mail.",status:500,type:"error"})}
+    if(!updated) throw("Something went wrong")
+    return res.status(200).json({msg:'An OTP has been sent to your email address.',status:200,type:"success"})
+  } catch (error) {
+    if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+    return res.status(500).json({msg:"Something went wrong while resending OTP!",status:500,type:'error'}) 
+  }
  }
 
  static resetPasswordVerify = async (req,res) =>{
