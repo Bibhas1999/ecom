@@ -116,7 +116,7 @@ export const addCategory = async(req,res)=>{
         let filtered = categories.filter(item => item.name == name )
         if(filtered.length !=0)throw new ValidationError("Category name must be unique")
         let sub_filter = categories.map(cat => cat.subcategories.filter(item => subcategories.some(elem => elem.name == item.name)))
-        if(sub_filter.length !=0)throw new ValidationError("Subcategories must be unique")
+        if(sub_filter[0].length !=0)throw new ValidationError("Subcategories must be unique")
         let category = new Category({
             name:name,
             subcategories:subcategories,

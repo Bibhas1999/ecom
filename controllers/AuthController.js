@@ -14,6 +14,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const token = req.cookies.jwtoken
+      console.log(token)
       if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
       if(!email) throw new ValidationError('Email is required')
       if(!password) throw new ValidationError('Password is required')
@@ -56,9 +57,17 @@ class AuthController {
 
   static register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        const token = req.cookies.jwtoken
-        if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
+       const token = req.cookies.jwtoken
+       if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
+        const { name, email,mobile, password } = req.body;
+        if(!name) throw new ValidationError("username is required")
+        if(!email) throw new ValidationError("email is required")
+        if(!mobile) throw new ValidationError("mobile no is required")
+        if(!password) throw new ValidationError("password is required")
+        if(typeof name !== "string")throw new ValidationError("name must be a string")
+        if(typeof mobile !== "number")throw new ValidationError("mobile no must be a number")
+        if(typeof password !== "string")throw new ValidationError("password must be a string")
+        if(password.length<6)throw new ValidationError("password must be at least 6 characters long")
         const result = await User.findOne({ email: email });
         if (!result) {
           let otp = generateOtp()
@@ -68,11 +77,14 @@ class AuthController {
           const user = new User({
             name: name,
             email: email,
+            mobile:mobile,
             password: hashedPassword,
             otp:otp
           });
           
-          await user.save();
+          let saved = await user.save();
+          if(!saved) throw("Somthing went wrong")
+
         //   const id = user._id
         //   const token = jwt.sign({id},process.env.JWT_SECRET_KEY,{
         //     expiresIn:'2h'
@@ -170,9 +182,9 @@ class AuthController {
     let otp = generateOtp();
     if(type == "va"){
       if(user.verified) throw new ValidationError("Account already verified")
-         await sendVerificationEmail(email,otp)
+        await sendVerificationEmail(email,otp)
         // let hashedOTP = bcrypt.hashSync(String(otp), 10);
-      let updated = await User.updateOne({email:email},{otp:otp})
+        let updated = await User.updateOne({email:email},{otp:otp})
       if(!updated) throw("Something went wrong")
       return res.status(200).json({msg:'OTP Resent for verifying account',status:200,type:"success"})
       }else if(type == "rp"){

@@ -1,21 +1,21 @@
 import express from 'express'
 import UserController from '../controllers/UserController.js' 
 import AuthController from '../controllers/AuthController.js' 
-import {authCheck,authorized} from '../controllers/middlewares/auth_middleware.js'
+import {authCheck,authorized, loggedIn} from '../controllers/middlewares/auth_middleware.js'
 import { getCategoryDetailsware,addCategoryware, updateCategoryware, deleteCategoryware, createProductware,deleteSubCatFromCategoryware } from '../controllers/middlewares/product_middleware.js'
 import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, updateProduct, deleteSubCatFromCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand } from '../controllers/ProductController.js'
 
 const router = express.Router();
 
 //Auth routes
-router.post('/register',AuthController.register)
+router.post('/register',loggedIn ,AuthController.register)
 router.post('/login',authorized,AuthController.login)
 router.get('/logout',AuthController.logout)
 router.post('/verify-account',AuthController.verifyAccount)
-router.post('/verify-reset-password',AuthController.verifyResetOtp)
-router.post('/resend-otp/',AuthController.resendOTP)
-router.post('/forgot-password/',AuthController.forgotPassword)
-router.post('/reset-password/',AuthController.resetPasswordVerify)
+router.post('/verify-reset-password',loggedIn,AuthController.verifyResetOtp)
+router.post('/resend-otp/',loggedIn,AuthController.resendOTP)
+router.post('/forgot-password/',loggedIn,AuthController.forgotPassword)
+router.post('/reset-password/',loggedIn,AuthController.resetPasswordVerify)
 router.get('/users', authCheck,UserController.getUser)
 router.post('/user/add',authCheck,UserController.addUser)
 router.get('/user/edit/:id',UserController.editUser)

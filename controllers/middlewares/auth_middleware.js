@@ -1,6 +1,7 @@
 import User from "../../models/User.js ";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import HTTPError from "../../ErrorHandlers/HTTPExceptions.js";
 dotenv.config();
 
 export const authCheck = async (req, res, next) => {
@@ -39,7 +40,24 @@ try {
   res.status(500).json({msg:"Something went Wrong",type:"error",status:500})
 }
     
-} 
+}
+
+export const loggedIn = async(req,res,next)=>{
+  try {
+    const token = req.cookies.jwtoken
+       if(token){
+        throw new HTTPError("Another account is logged in.Please logout to continue",400)
+       }else{
+        next()
+       } 
+    
+  } catch (error) {
+    console.log(error);
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while signing up!",status:500,type:'error'}) 
+  }
+}
 
 export const generateOtp = ()=>{
   var digits = '0123456789';
