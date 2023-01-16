@@ -36,12 +36,11 @@ export const addCategoryware = (req,res,next) =>{
 
  export const updateCategoryware = (req,res,next) =>{
     try {
-        const {id, name, subcategories} = req.body
+        const {id, name} = req.body
 
        if(!id)throw new ValidationError('Category id must be filled');
        if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid category id');
        if(typeof id != "string") throw new ValidationError('id must be a string');
-       if(subcategories instanceof Array == false) throw new ValidationError('Subcatgories must be an array')
         next()
      } catch (error) {
          if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
@@ -64,7 +63,7 @@ export const addCategoryware = (req,res,next) =>{
      }
  }
 
- export const deleteSubCatFromCategoryware = (req,res,next) =>{
+ export const deleteSubCategoryware = (req,res,next) =>{
     try {
         const {cat_id,id} = req.body
        if(!cat_id)throw new ValidationError('Category id must be filled');
@@ -113,5 +112,23 @@ export const addCategoryware = (req,res,next) =>{
  }
 
  export const updateProductware = (req,res,next)=>{
-    
+    try {
+        const {id,name,price,selling_quantity,desc,brand_id,attribute,rating,reviews,specifications,isVarient} = req.body
+        if(!id)throw new ValidationError('Category id must be filled');
+        if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid category id');
+        if(typeof id != "string") throw new ValidationError('id must be a string');
+        if(!name)throw new ValidationError('Product Name is required'); 
+        if(typeof name !== "string") throw new ValidationError("Name must be a string")
+        if(!price) throw new ValidationError("Price is required")
+        if(price < 0)throw new ValidationError('Price must be greater than or equal to 0');
+        if(!selling_quantity)throw new ValidationError('Selling quantity is required');
+        if(selling_quantity < 0)throw new ValidationError('Selling quantity must be greater than or equal to 0');
+        if(!desc)throw new ValidationError('Description is required')
+
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong!",status:500,type:'error'}) 
+    }
  }

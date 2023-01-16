@@ -2,8 +2,8 @@ import express from 'express'
 import UserController from '../controllers/UserController.js' 
 import AuthController from '../controllers/AuthController.js' 
 import {authCheck,authorized, loggedIn} from '../controllers/middlewares/auth_middleware.js'
-import { getCategoryDetailsware,addCategoryware, updateCategoryware, deleteCategoryware, createProductware,deleteSubCatFromCategoryware } from '../controllers/middlewares/product_middleware.js'
-import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, updateProduct, deleteSubCatFromCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory } from '../controllers/ProductController.js'
+import { getCategoryDetailsware,addCategoryware,updateProductware, updateCategoryware, deleteCategoryware, createProductware,deleteSubCategoryware } from '../controllers/middlewares/product_middleware.js'
+import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, updateProduct, deleteSubCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory, addSubCategory } from '../controllers/ProductController.js'
 
 const router = express.Router();
 
@@ -24,19 +24,20 @@ router.get('/user/delete/:id',UserController.deleteUser)
 router.post('/upload',UserController.uploadPic)
 
 //product routes
-router.get('/products', authCheck,getProducts)
-router.post('/product',authCheck,getProduct)
+router.get('/products',getProducts)
+router.post('/product',getProduct)
 router.post('/product/create',authCheck, createProductware,createProduct)
-router.put('/product/update', authCheck,updateProduct)
+router.put('/product/update', authCheck,updateProductware, updateProduct)
 
 //category routes
-router.get('/categories', authCheck,getCategories)
-router.post('/category', authCheck,getCategoryDetailsware,getCategory)
+router.get('/categories',getCategories)
+router.post('/category',getCategoryDetailsware,getCategory)
 router.post('/category/create', authCheck,addCategoryware, addCategory)
 router.put('/category/update', authCheck,updateCategoryware,updateCategory)
-router.put('/subcategory/update',updateSubCatgory)
 router.delete('/category/delete', authCheck,deleteCategoryware,deleteCategory)
-router.delete('/subcategory/delete', authCheck,deleteSubCatFromCategoryware,deleteSubCatFromCategory)
+router.post('/subcategory/create',addSubCategory)
+router.put('/subcategory/update',updateSubCatgory)
+router.delete('/subcategory/delete',deleteSubCategoryware,deleteSubCategory)
 
 //attribute routes
 // router.post('/attribute/create', authCheck , createAttribute)
@@ -45,7 +46,7 @@ router.delete('/subcategory/delete', authCheck,deleteSubCatFromCategoryware,dele
 // router.delete('/attribute/value/delete', authCheck , deleteValuesFromAttribute)
 
 router.get('/brands', authCheck, getBrands)
-router.get('/brand', authCheck, getBrand)
+router.post('/brand', authCheck, getBrand)
 router.post('/brand/create', authCheck, addBrand)
 router.put('/brand/update', authCheck, updateBrand)
 router.delete('/brand/delete', authCheck, deleteBrand)

@@ -154,30 +154,54 @@ export const addCategory = async(req,res)=>{
     }
 }  
 
+// export const updateCategory = async (req,res)=>{
+//     try {
+//         const {id,name,subcategories} = req.body
+//         let categories = await Category.find()
+//         let filtered_cat = categories.filter(item => item._id != id && item.name == name )
+//         if(filtered_cat.length !=0)throw new ValidationError("Category name must be unique")
+
+//         let category = await Category.findOne({_id:id})
+//         if(!category) throw new HTTPError('No Category Found',404)
+//         let cat_name,sub_cat
+//         if(typeof name=="undefined" || name == ""){
+//             cat_name=category.name
+//         }else{
+//             cat_name=name 
+//         }
+//         if(subcategories?.length == 0){
+//             sub_cat=[...category.subcategories]
+//         }else{
+//             sub_cat=[...subcategories,...category.subcategories] 
+//         }
+//         let filtered = category.subcategories.filter(item => subcategories.some(elem => elem.name == item.name))
+//         if(filtered.length !=0)throw new ValidationError("Subcategories must be unique")
+//         let update = await Category.updateOne({_id:id},{name:cat_name,subcategories:sub_cat})
+//         if(!update)throw("Somthing went wrong")
+//         return res.status(200).json({msg:"Category Updated Successfully",status:200,type:"success"})
+//     } catch (error) {
+//         console.log(error)
+//         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+//         if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+//         return res.status(500).json({msg:"Something went wrong while updating categories!",status:500,type:'error'}) 
+//     }
+// }
+
 export const updateCategory = async (req,res)=>{
     try {
-        const {id,name,subcategories} = req.body
-
+        const {id,name} = req.body
         let categories = await Category.find()
         let filtered_cat = categories.filter(item => item._id != id && item.name == name )
-        if(filtered_cat.length !=0)throw new ValidationError("Category name must be unique")
-
+        if(filtered_cat.length !=0)throw new ValidationError("Category with this name already exists.Please try typing a different name.")
         let category = await Category.findOne({_id:id})
         if(!category) throw new HTTPError('No Category Found',404)
-        let cat_name,sub_cat
+        let cat_name
         if(typeof name=="undefined" || name == ""){
             cat_name=category.name
         }else{
             cat_name=name 
         }
-        if(subcategories?.length == 0){
-            sub_cat=[...category.subcategories]
-        }else{
-            sub_cat=[...subcategories,...category.subcategories] 
-        }
-        let filtered = category.subcategories.filter(item => subcategories.some(elem => elem.name == item.name))
-        if(filtered.length !=0)throw new ValidationError("Subcategories must be unique")
-        let update = await Category.updateOne({_id:id},{name:cat_name,subcategories:sub_cat})
+        let update = await Category.updateOne({_id:id},{name:cat_name,subcategories:category.subcategories})
         if(!update)throw("Somthing went wrong")
         return res.status(200).json({msg:"Category Updated Successfully",status:200,type:"success"})
     } catch (error) {
@@ -188,27 +212,6 @@ export const updateCategory = async (req,res)=>{
     }
 }
 
-export const updateSubCatgory = async (req,res)=>{
-    try {
-        const {cat_id,id,name} = req.body
-        const category = await Category.findOne({_id:cat_id})
-        if(!id) throw new ValidationError("Subcategory id is required")
-        if(typeof id !== "string")throw new ValidationError("id must be a string")
-        if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid subcategory id');
-        if(!category) throw new HTTPError('No Category Found!',404);
-        let subcategory = category.subcategories.filter(item => item._id == id)
-        if(subcategory.length ==0) throw new HTTPError('No Sub Category Found',404)
-        category.subcategories.id(id).name = name
-        let updated = await category.save();
-        if(!updated) throw("Something went wrong")
-        return res.status(200).json({msg:"SubCategory Updated Successfully",status:200,type:"success"})
-    } catch (error) {
-        console.log(error)
-        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
-        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
-        return res.status(500).json({msg:"Something went wrong while updating subcategory!",status:500,type:'error'}) 
-    }
-}
 export const deleteCategory = async(req,res)=>{
     try {
         const {id} = req.body
@@ -225,7 +228,55 @@ export const deleteCategory = async(req,res)=>{
     }
 }
 
-export const deleteSubCatFromCategory = async (req,res)=>{
+export const addSubCategory = async (req,res)=>{
+    try {
+       const {cat_id, name} = req.body
+       if(!cat_id) throw new ValidationError("Category id is required")
+       if(mongoose.isValidObjectId(cat_id)==false) throw new ValidationError("Invalid Category id")
+       if(typeof cat_id !== "string") throw new ValidationError("Category id must be a string")
+       if(!name) throw new ValidationError("Subcategory name is required")
+       if(typeof name !== "string") throw new ValidationError("SubCategory name must be a string")
+       let category = await Category.findOne({_id:cat_id})
+       if(!category) throw new HTTPError("No Category Found",404)
+       let exists = category.subcategories.filter(subcat => subcat.name == name)
+       if(exists.length !== 0) throw new ValidationError("Subcategory with this name already exists")
+       let new_subcat = {name:name}
+       let update = await Category.updateOne({_id:cat_id},{$push: {subcategories:new_subcat}})
+       if(!update) throw ("Something went wrong")
+       return res.status(200).json({msg:"SubCategory Added Successfully",status:200,type:"success"})
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while creating subcategory!",status:500,type:'error'}) 
+    }
+}
+export const updateSubCatgory = async (req,res)=>{
+    try {
+        const {cat_id,id,name} = req.body
+        if(!id) throw new ValidationError("Subcategory id is required")
+        if(typeof id !== "string")throw new ValidationError("id must be a string")
+        if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid subcategory id');
+        if(!cat_id) throw new ValidationError("Category id is required")
+        if(typeof cat_id !== "string")throw new ValidationError("Category id must be a string")
+        if(mongoose.isValidObjectId(cat_id)==false) throw new ValidationError('Invalid Category id');
+        const category = await Category.findOne({_id:cat_id})
+        if(!category) throw new HTTPError('No Category Found!',404);
+        let subcategory = category.subcategories.filter(item => item._id == id)
+        if(subcategory.length ==0) throw new HTTPError('No Sub Category Found',404)
+        category.subcategories.id(id).name = name
+        let updated = await category.save();
+        if(!updated) throw("Something went wrong")
+        return res.status(200).json({msg:"SubCategory Updated Successfully",status:200,type:"success"})
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while updating subcategory!",status:500,type:'error'}) 
+    }
+}
+
+export const deleteSubCategory = async (req,res)=>{
     try {
         const {cat_id,id} = req.body
         let category = await Category.findOne({_id:cat_id})
@@ -242,7 +293,6 @@ export const deleteSubCatFromCategory = async (req,res)=>{
         return res.status(500).json({msg:"Something went wrong while deleting subcategory!",status:500,type:'error'}) 
     }
 }
-
 
 
 export const createAttribute = async (req,res)=>{
