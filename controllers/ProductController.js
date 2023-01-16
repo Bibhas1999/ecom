@@ -491,6 +491,8 @@ export const deleteBrand = async (req,res)=>{
         if(!id)throw new ValidationError('Brand id must be filled');
         if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid brand id');
         if(typeof id != "string") throw new ValidationError('id must be a string'); 
+        let brand = await Brand.findOne({_id:id})
+        if(!brand) throw new HTTPError("Brand not found",404)
         let deleted = await Brand.deleteOne({_id:id})
         if(!deleted)throw("Something went wrong")
         return res.status(200).json({msg:"Brand Deleted Successfully",status:200,type:"success"})
