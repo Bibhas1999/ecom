@@ -7,30 +7,32 @@ import ValidationError from "../ErrorHandlers/ValidationExceptions.js";
 import File from "../models/File.js";
 import Attribute from "../models/Attribute.js";
 import Brand from "../models/Brand.js";
+
 export const getProducts = async (req,res)=>{
    try {
      let products = await Product.find();
-     if(products?.length == 0) return res.status(404).json({products:[],msg:"No Products Found",status:404,type:"error"})
-     return res.status(201).json({products:products,msg:"Products fetched successfully",status:201,type:"success"})
+     if(products?.length == 0) throw new HTTPError("No Products Found!",404);
+     return res.status(201).json({products:products,msg:"Products fetched successfully",status:201,type:"success"});
    } catch (error) {
-     return res.status(500).json({products:[],msg:"Something went wrong",status:500,type:"error"})
+    if(error instanceof ValidationError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'});
+    if(error instanceof HTTPError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'});
+    return res.status(500).json({product:[],msg:"Something went wrong!",status:500,type:'error'});
    }
 }
 
 export const getProduct = async (req,res)=>{
     try {
         const {id} = req.body
-
-        if(!id) return res.status(400).json({product:[],msg:null,status:400,error:"Product id is required"})
-
-        if(mongoose.isValidObjectId(id)==false) return res.status(400).json({product:[],msg:"Invalid product id",status:400,type:"error"})
-
+        if(!id) throw new ValidationError("Product id is required!")
+        if(mongoose.isValidObjectId(id)==false) throw new ValidationError("Invalid product id")
+        if(typeof id !== "string")throw new ValidationError("Product id must be a string")
         let product = await Product.findOne({_id:id})
-
-        if(!product) return res.status(404).json({product:[],msg:"No Product Found",status:404,type:"error"})
-
+        if(!product) throw new HTTPError("No Product Found",404)
+        return res.status(201).json({product:product,msg:"Product fetched successfully",status:201,type:"success"})
     } catch (error) {
-        return res.status(500).json({product:[],msg:"Something went wrong!",status:500,type:"error"})
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({product:[],msg:"Something went wrong!",status:500,type:'error'})
     }
 }
 
@@ -76,13 +78,33 @@ export const createProduct = async (req,res) =>{
 
 
 export const updateProduct = async (req,res)=>{
-const {name,price,selling_quantity,desc,brand_id,attribute,rating,reviews,specifications,isVarient} = req.body
+    try {
+     const {id,name,price,selling_quantity,desc,brand_id,attribute,rating,reviews,specifications,isVarient} = req.body
+     
 
+    } catch (error) {
+        
+    }
+ 
 }
 
 
-export const deleteProduct = async ()=>{
-    
+export const deleteProduct = async (req,res)=>{
+    try {
+      const {id} = req.body
+      if(!id) throw new ValidationError("Product id is required")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError("Invalid Product id")
+      if(typeof id !== "string") throw new ValidationError("Product id must be a string")
+      let product = await Product.findOne({_id:id})
+      if(!product)throw new HTTPError("Product Not Found!",404)
+      let deleted = await Product.deleteOne({_id:id})
+      if(!deleted)throw("Something went wrong")
+      return res.status(200).json({msg:"Product Deleted Successfully",status:200,type:"success"})
+    } catch (error) {
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while adding product!",status:500,type:'error'}) 
+    } 
 }
 
 export const getCategories = async (req,res)=>{
@@ -166,6 +188,27 @@ export const updateCategory = async (req,res)=>{
     }
 }
 
+export const updateSubCatgory = async (req,res)=>{
+    try {
+        const {cat_id,id,name} = req.body
+        const category = await Category.findOne({_id:cat_id})
+        if(!id) throw new ValidationError("Subcategory id is required")
+        if(typeof id !== "string")throw new ValidationError("id must be a string")
+        if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid subcategory id');
+        if(!category) throw new HTTPError('No Category Found!',404);
+        let subcategory = category.subcategories.filter(item => item._id == id)
+        if(subcategory.length ==0) throw new HTTPError('No Sub Category Found',404)
+        category.subcategories.id(id).name = name
+        let updated = await category.save();
+        if(!updated) throw("Something went wrong")
+        return res.status(200).json({msg:"SubCategory Updated Successfully",status:200,type:"success"})
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while updating subcategory!",status:500,type:'error'}) 
+    }
+}
 export const deleteCategory = async(req,res)=>{
     try {
         const {id} = req.body
@@ -199,6 +242,8 @@ export const deleteSubCatFromCategory = async (req,res)=>{
         return res.status(500).json({msg:"Something went wrong while deleting subcategory!",status:500,type:'error'}) 
     }
 }
+
+
 
 export const createAttribute = async (req,res)=>{
     try {

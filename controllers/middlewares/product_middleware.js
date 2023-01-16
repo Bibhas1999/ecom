@@ -111,3 +111,7 @@ export const addCategoryware = (req,res,next) =>{
     }
 
  }
+
+ export const updateProductware = (req,res,next)=>{
+    
+ }
