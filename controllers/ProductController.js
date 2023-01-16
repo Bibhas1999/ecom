@@ -458,10 +458,10 @@ export const updateBrand = async (req,res)=>{
       if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid brand id');
       if(typeof id != "string") throw new ValidationError('id must be a string');
       if(typeof name !== "string")throw new ValidationError('Brand name must be a string'); 
-      if(subcat_id){
-      if(mongoose.isValidObjectId(subcat_id)==false) throw new ValidationError('Invalid subcaetgory id');
-      if(typeof subcat_id != "string") throw new ValidationError('Subcategory id must be a string'); 
-      }
+    //   if(subcat_id){
+    //   if(mongoose.isValidObjectId(subcat_id)==false) throw new ValidationError('Invalid subcaetgory id');
+    //   if(typeof subcat_id != "string") throw new ValidationError('Subcategory id must be a string'); 
+    //   }
       let brand = await Brand.findOne({_id:id})
       if(!brand) throw new HTTPError("Brand Not Found",404)
       if(typeof name == "undefined" || name ==""){
