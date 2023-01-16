@@ -493,6 +493,7 @@ export const deleteBrand = async (req,res)=>{
         if(typeof id != "string") throw new ValidationError('id must be a string'); 
         let brand = await Brand.findOne({_id:id})
         if(!brand) throw new HTTPError("Brand not found",404)
+        console.log(brand)
         let deleted = await Brand.deleteOne({_id:id})
         if(!deleted)throw("Something went wrong")
         return res.status(200).json({msg:"Brand Deleted Successfully",status:200,type:"success"})
