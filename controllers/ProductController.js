@@ -454,18 +454,21 @@ export const addBrand = async (req,res)=>{
 export const updateBrand = async (req,res)=>{
     try {
       const {id,name, subcat_id} = req.body
-      if(!name)throw new ValidationError('Brand name is required'); 
-      if(typeof name !== "string")throw new ValidationError('Brand name must be a string'); 
       if(!id)throw new ValidationError('Brand id must be filled');
       if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid brand id');
       if(typeof id != "string") throw new ValidationError('id must be a string');
-      if(!subcat_id)throw new ValidationError('Subcategory id must be filled');
+      if(typeof name !== "string")throw new ValidationError('Brand name must be a string'); 
+      if(subcat_id){
       if(mongoose.isValidObjectId(subcat_id)==false) throw new ValidationError('Invalid subcaetgory id');
       if(typeof subcat_id != "string") throw new ValidationError('Subcategory id must be a string'); 
+      }
       let brand = await Brand.findOne({_id:id})
       if(!brand) throw new HTTPError("Brand Not Found",404)
       if(typeof name == "undefined" || name ==""){
         name = brand.name
+      }
+      if(typeof subcat_id == "undefined" || subcat_id ==""){
+        subcat_id = brand.subcat_id
       }
       let update = await Brand.updateOne({_id:id},{name:name,subcat_id:subcat_id});
       if(!update)throw("Something went wrong")
@@ -484,7 +487,7 @@ export const deleteBrand = async (req,res)=>{
         if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid brand id');
         if(typeof id != "string") throw new ValidationError('id must be a string'); 
         let deleted = await Brand.deleteOne({_id:id})
-        if(!deleted)throw("Somthing went wrong")
+        if(!deleted)throw("Something went wrong")
         return res.status(200).json({msg:"Brand Deleted Successfully",status:200,type:"success"})
     } catch (error) {
         console.log(error)
