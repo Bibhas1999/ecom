@@ -7,6 +7,7 @@ import ValidationError from "../ErrorHandlers/ValidationExceptions.js";
 import File from "../models/File.js";
 import Attribute from "../models/Attribute.js";
 import Brand from "../models/Brand.js";
+import Cart from "../models/Cart.js";
 
 export const getProducts = async (req,res)=>{
    try {
@@ -467,13 +468,17 @@ export const updateBrand = async (req,res)=>{
       if(typeof name == "undefined" || name ==""){
         name = brand.name
       }
+      let new_sub_cat
       if(typeof subcat_id == "undefined" || subcat_id ==""){
-        subcat_id = brand.subcat_id
+        new_sub_cat = brand.subcat_id
+      }else{
+        new_sub_cat = subcat_id
       }
-      let update = await Brand.updateOne({_id:id},{name:name,subcat_id:subcat_id});
+      let update = await Brand.updateOne({_id:id},{name:name,subcat_id:new_sub_cat});
       if(!update)throw("Something went wrong")
       res.status(201).json({msg:"Brand updated successfully", status:201,type:"success"})
     } catch (error) {
+        console.log(error)
         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
         if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
         return res.status(500).json({msg:"Something went wrong while updating brand",status:500,type:'error'}) 

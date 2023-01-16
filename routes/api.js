@@ -47,8 +47,8 @@ router.delete('/subcategory/delete',authCheck,deleteSubCategoryware,deleteSubCat
 
 router.get('/brands', getBrands)
 router.post('/brand', getBrand)
-router.post('/brand/create', authCheck, addBrand)
-router.put('/brand/update', authCheck, updateBrand)
-router.delete('/brand/delete', authCheck, deleteBrand)
+router.post('/brand/create', addBrand)
+router.put('/brand/update', updateBrand)
+router.delete('/brand/delete', deleteBrand)
 
 export default router
