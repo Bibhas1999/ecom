@@ -31,9 +31,9 @@ export const getProduct = async (req,res)=>{
         if(!product) throw new HTTPError("No Product Found",404)
         return res.status(201).json({product:product,msg:"Product fetched successfully",status:201,type:"success"})
     } catch (error) {
-        if(error instanceof ValidationError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'})
-        if(error instanceof HTTPError) return res.status(error.statusCode).json({product:[],msg:error.messege,status:error.statusCode,type:'error'})
-        return res.status(500).json({product:[],msg:"Something went wrong!",status:500,type:'error'})
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({product:{},msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({product:{},msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({product:{},msg:"Something went wrong!",status:500,type:'error'})
     }
 }
 
