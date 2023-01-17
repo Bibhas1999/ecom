@@ -3,7 +3,7 @@ const userSchema = mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true },
-    mobile: { type: Number,min:[10,"Mobile muat be at least 10 characters long"], max:32 },
+    mobile: { type: Number},
     password: { type: String, required: true, trim: true, min:[6,"Password muat be at least 6 characters long"], max:32},
     otp: { type: String, required: true},
     active: { type: Boolean, default: true },

@@ -58,10 +58,12 @@ export const createProduct = async (req,res) =>{
          selling_quantity:selling_quantity,
          desc:desc,
          brand_id:brand_id,
+        //  attribute:JSON.parse(attribute),
          attribute:attribute,
          isVarient:isVarient,
          rating:rating,
          reviews:reviews,
+        //  specifications:JSON.parse(specifications),
          specifications:specifications,
        })
        let saved = await product.save()

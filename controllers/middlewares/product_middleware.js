@@ -124,7 +124,13 @@ export const addCategoryware = (req,res,next) =>{
         if(!selling_quantity)throw new ValidationError('Selling quantity is required');
         if(selling_quantity < 0)throw new ValidationError('Selling quantity must be greater than or equal to 0');
         if(!desc)throw new ValidationError('Description is required')
-
+        if(isVarient){
+            if(!attribute)throw new ValidationError('Varient products must have at least 1 attribute');
+        }
+        if(!brand_id)throw new ValidationError('Brand id must be filled');
+        if(mongoose.isValidObjectId(brand_id)==false) throw new ValidationError('Invalid brand id');
+        if(typeof brand_id != "string") throw new ValidationError('brand id must be a string'); 
+        
     } catch (error) {
         console.log(error)
         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
