@@ -7,8 +7,8 @@ const pass = process.env.MAIL_PASSWORD;
 
 const transporter = nodemailer.createTransport({
   host: "smtp.zoho.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
   auth: {
     user: email,
     pass: pass,

@@ -83,10 +83,16 @@ export const createProduct = async (req,res) =>{
 export const updateProduct = async (req,res)=>{
     try {
      const {id,name,price,selling_quantity,desc,brand_id,attribute,rating,reviews,specifications,isVarient} = req.body
-     
-
+     let product = await Product.findOne({_id:id})
+     if(!product)throw new HTTPError("No Product Found!",404)
+     let brand = await Brand.findOne({_id:brand_id})
+       if(!brand)throw new HTTPError("No brand found",404)
+     let update = await Product.updateOne({_id:id},)  
     } catch (error) {
-        
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while updating product!",status:500,type:'error'}) 
     }
  
 }
