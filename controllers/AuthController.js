@@ -73,7 +73,7 @@ class AuthController {
           let otp = generateOtp()
           let hashedPassword = bcrypt.hashSync(password, 10);
           // let hashedOTP = bcrypt.hashSync(String(otp), 10);
-          await sendVerificationEmail(email,otp)
+          setTimeout(()=>sendVerificationEmail(email,otp),2000)
           const user = new User({
             name: name,
             email: email,

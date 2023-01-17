@@ -29,9 +29,7 @@ export const sendVerificationEmail = async (useremail, otp) => {
       html: `<h2>Hii ${useremail}, <br> Here is One Time Password ${otp} to verify your account </h2>`, 
     };
     
-    process.nextTick(()=>{
-      transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
-    }) 
+    transporter.sendMail(mainOptions).then(res => console.log("res ",res)).catch(err => console.log(err))
     
   } catch (error) {
     console.log(error)
