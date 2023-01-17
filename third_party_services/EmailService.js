@@ -6,7 +6,7 @@ const email = process.env.MAIL_FROM_ADDRESS;
 const pass = process.env.MAIL_PASSWORD;
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.zoho.com",
   port: 465,
   secure: true,
   auth: {
