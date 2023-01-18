@@ -30,6 +30,7 @@ try {
     console.log(req.cookies.jwtoken)
     const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
     const rootUser = await User.findOne({ _id: verifyToken.id });
+    console.log(rootUser)
     if(!rootUser)return res.status(400).json({msg:"Invalid Token",type:"error",status:400})
     if(!rootUser.verified)return res.status(400).json({msg:"Your Account is not verified",type:"error",status:400})
     return res.status(400).json({msg:"Already Loggedin",type:"error",status:400})  
