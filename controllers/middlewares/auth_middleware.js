@@ -56,7 +56,7 @@ export const loggedIn = async(req,res,next)=>{
        } 
     
   } catch (error) {
-    console.log(error);
+        console.log(error);
         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
         if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
         return res.status(500).json({msg:"Something went wrong while signing up!",status:500,type:'error'}) 
