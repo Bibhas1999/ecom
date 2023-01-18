@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
     active: { type: Boolean, default: true },
     verified: { type: Boolean, default: false },
     reset_verified: {type: Boolean, default:true},
-    token:{type:String},
+    tokens_blacklisted:{type:Array},
     roles:{type:String,enum : ['Admin','User'],default:'User'}
   },
   { timestamps: true }
