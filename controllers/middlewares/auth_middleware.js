@@ -29,6 +29,7 @@ try {
   if(req.cookies.jwtoken){
     console.log("hgh",req.cookies.jwtoken)
     const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
+    console.log(verifyToken._id)
     const rootUser = await User.findOne({ _id: verifyToken.id });
     console.log(rootUser)
     if(!rootUser)return res.status(400).json({msg:"Invalid Token",type:"error",status:400})
