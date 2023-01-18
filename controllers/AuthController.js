@@ -76,6 +76,7 @@ class AuthController {
           
           let sent = await sendVerificationEmail(email,otp)
           console.log(sent.messageId)
+          if(!sent.messageId) throw new HTTPError("Internal Server Error",500)
           const user = new User({
             name: name,
             email: email,
