@@ -9,7 +9,7 @@ const router = express.Router();
 
 //Auth routes
 router.post('/register',loggedIn ,AuthController.register)
-router.post('/login',loggedIn,AuthController.login)
+router.post('/login',authorized,AuthController.login)
 router.get('/logout',AuthController.logout)
 router.post('/verify-account',AuthController.verifyAccount)
 router.post('/verify-reset-password',loggedIn,AuthController.verifyResetOtp)
