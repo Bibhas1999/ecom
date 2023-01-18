@@ -27,12 +27,12 @@ export const authCheck = async (req, res, next) => {
 export const authorized = async (req,res,next)=>{
 try {
   if(req.cookies.jwtoken){
+    console.log(req.cookies.jwtoken)
     const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
     const rootUser = await User.findOne({ _id: verifyToken.id });
     if(!rootUser)return res.status(400).json({msg:"Invalid Token",type:"error",status:400})
     if(!rootUser.verified)return res.status(400).json({msg:"Your Account is not verified",type:"error",status:400})
-    return res.status(400).json({msg:"Already Loggedin",type:"error",status:400})
-    
+    return res.status(400).json({msg:"Already Loggedin",type:"error",status:400})  
   }else{
     next()
   }
