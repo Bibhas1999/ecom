@@ -1,4 +1,4 @@
-import User from "../../models/User.js ";
+import User from "../../models/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import HTTPError from "../../ErrorHandlers/HTTPExceptions.js";
@@ -25,27 +25,45 @@ export const authCheck = async (req, res, next) => {
 };
 
 export const authorized = async (req,res,next)=>{
+// try {
+//   if(req.cookies.jwtoken){
+//     console.log(req.cookies.jwtoken)
+//     const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
+//     const rootUser = await User.findOne({ _id: verifyToken.id });
+//     console.log(rootUser)
+//     if(!rootUser)return res.status(400).json({msg:"Invalid Token",type:"error",status:400})
+//     if(!rootUser.verified)return res.status(400).json({msg:"Your Account is not verified",type:"error",status:400})
+//     return res.status(400).json({msg:"Already Loggedin",type:"error",status:400})  
+//   }else{
+//     next()
+//   }
+// } catch (error) {
+//   res.status(500).json({msg:"Something went Wrong",type:"error",status:500})
+// }
 try {
-  if(req.cookies.jwtoken){
-    console.log(req.cookies.jwtoken)
-    const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
-    const rootUser = await User.findOne({ _id: verifyToken.id });
-    console.log(rootUser)
-    if(!rootUser)return res.status(400).json({msg:"Invalid Token",type:"error",status:400})
-    if(!rootUser.verified)return res.status(400).json({msg:"Your Account is not verified",type:"error",status:400})
-    return res.status(400).json({msg:"Already Loggedin",type:"error",status:400})  
-  }else{
+  if(!req.cookies.jwtoken){
     next()
+  }else{
+  const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
+  const rootUser = await User.findOne({ _id: verifyToken.id });
+  if(!rootUser)throw new HTTPError("No user is associated with this token!",401)
+  if(!rootUser.verified) throw new HTTPError("Your account is not verified. Please try again after verifying your account")
+  return res.status(400).json({msg:"Already Loggedin",status:400,type:'error'})
   }
 } catch (error) {
-  res.status(500).json({msg:"Something went Wrong",type:"error",status:500})
-}
-    
+  console.log(error);
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while signing up!",status:500,type:'error'}) 
+}  
 }
 
 export const loggedIn = async(req,res,next)=>{
   try {
     const token = req.cookies.jwtoken
+    const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
+    const rootUser = await User.findOne({ _id: verifyToken.id });
+    console.log(rootUser)
        if(token){
         throw new HTTPError("Another account is logged in.Please logout to continue",400)
        }else{
