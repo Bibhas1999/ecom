@@ -13,9 +13,9 @@ class AuthController {
   static login = async (req, res) => {
     try {
       const { email, password } = req.body;
-      const token = req.cookies.jwtoken
-      console.log("tok",token)
-      if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
+      // const token = req.cookies.jwtoken
+      // console.log("tok",token)
+      // if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
       if(!email) throw new ValidationError('Email is required')
       if(!password) throw new ValidationError('Password is required')
 
