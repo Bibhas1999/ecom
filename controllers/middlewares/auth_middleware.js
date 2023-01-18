@@ -27,7 +27,7 @@ export const authCheck = async (req, res, next) => {
 export const authorized = async (req,res,next)=>{
 try {
   let token = req.cookies.jwtoken
-  console.log(token)
+  console.log("gh"+token)
   if(typeof token !== "undefined"){
     // console.log("hgh",req.cookies.jwtoken)
     const verifyToken = jwt.verify(req.cookies.jwtoken, process.env.JWT_SECRET_KEY);
