@@ -29,7 +29,7 @@ class AuthController {
             var oneWeek = 7 * 24 * 3600 * 1000
              res.cookie("jwtoken",token,{
               expires: new Date(Date.now() + oneWeek),
-              httpOnly:true,
+              // httpOnly:true,
               // sameSite:'none',
               // secure:true
              })
