@@ -48,7 +48,7 @@ class AuthController {
         }
       
     } catch (error) {
-      console.log("hgg",error)
+      console.log(error)
       if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       return res.status(500).json({user:{},msg:"Something went wrong while logging in!",status:500,type:'error'}) 
@@ -119,7 +119,10 @@ class AuthController {
 
       const token = req.cookies.jwtoken;
       if(token){
-        res.clearCookie('jwtoken')
+        let options = {
+          domain:"https://ecom-five-pi.vercel.app/"
+        }
+        res.clearCookie('jwtoken',options)
         return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
       }
       return res.status(400).json({msg:"You haven't loggedin yet",type:"error",status:400})
