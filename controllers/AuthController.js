@@ -74,7 +74,7 @@ class AuthController {
           let hashedPassword = bcrypt.hashSync(password, 10);
           // let hashedOTP = bcrypt.hashSync(String(otp), 10);
           
-          let sent = sendVerificationEmail(email,otp)
+          let sent = await sendVerificationEmail(email,otp)
           console.log(sent)
           const user = new User({
             name: name,
