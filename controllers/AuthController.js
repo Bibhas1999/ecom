@@ -14,7 +14,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const token = req.cookies.jwtoken
-      console.log(token)
+      console.log("tok",token)
       if(token) throw new HTTPError("Another account is logged in.Please logout to continue",400)
       if(!email) throw new ValidationError('Email is required')
       if(!password) throw new ValidationError('Password is required')
@@ -48,7 +48,7 @@ class AuthController {
         }
       
     } catch (error) {
-      console.log(error)
+      console.log("hgg",error)
       if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       return res.status(500).json({user:{},msg:"Something went wrong while logging in!",status:500,type:'error'}) 
