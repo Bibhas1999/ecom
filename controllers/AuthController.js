@@ -30,8 +30,8 @@ class AuthController {
              res.cookie("jwtoken",token,{
               expires: new Date(Date.now() + oneWeek),
               httpOnly:true,
-              sameSite:'lax',
-              // secure:true
+              sameSite:'none',
+              secure:false
              })
             return res.status(200).json({
               msg:'Login Successful',
