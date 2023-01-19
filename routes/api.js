@@ -3,7 +3,7 @@ import UserController from '../controllers/UserController.js'
 import AuthController from '../controllers/AuthController.js' 
 import {authCheck,authorized, loggedIn} from '../controllers/middlewares/auth_middleware.js'
 import { getCategoryDetailsware,addCategoryware,updateProductware, updateCategoryware, deleteCategoryware, createProductware,deleteSubCategoryware } from '../controllers/middlewares/product_middleware.js'
-import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, updateProduct, deleteSubCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory, addSubCategory } from '../controllers/ProductController.js'
+import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, deleteProduct, updateProduct, deleteSubCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory, addSubCategory } from '../controllers/ProductController.js'
 
 const router = express.Router();
 
@@ -28,6 +28,7 @@ router.get('/products',getProducts)
 router.post('/product',getProduct)
 router.post('/product/create', createProductware,createProduct)
 router.put('/product/update',updateProductware, updateProduct)
+router.delete('/product/delete', deleteProduct)
 
 //category routes
 router.get('/categories',getCategories)
