@@ -117,10 +117,12 @@ class AuthController {
 
   static logout = async (req,res)=>{
 
-      const token = req.cookies.jwtoken;
+      const token = await req.cookies.jwtoken;
       if(token){
-        res.clearCookie('jwtoken')
-        return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
+       let clear = await res.clearCookie('jwtoken')
+       console.log(clear)
+       if(clear) return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
+       return res.status(500).json({msg:"Something went wrong while signing out",type:"error",status:500})
       }
       return res.status(400).json({msg:"You haven't loggedin yet",type:"error",status:400})
   }
