@@ -118,11 +118,9 @@ class AuthController {
   static logout = async (req,res)=>{
 
       const token = await req.cookies.jwtoken;
+      console.log(token)
       if(token){
-       let clear = await res.clearCookie('jwtoken',{
-        domain:'ecom-five-pi.vercel.app',
-        path:'/'
-       })
+       let clear = await res.clearCookie('jwtoken')
        console.log(clear)
        if(clear) return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
        return res.status(500).json({msg:"Something went wrong while signing out",type:"error",status:500})
