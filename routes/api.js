@@ -26,8 +26,8 @@ router.post('/upload',UserController.uploadPic)
 //product routes
 router.get('/products',getProducts)
 router.post('/product',getProduct)
-router.post('/product/create',authCheck, createProductware,createProduct)
-router.put('/product/update', authCheck,updateProductware, updateProduct)
+router.post('/product/create', createProductware,createProduct)
+router.put('/product/update',updateProductware, updateProduct)
 
 //category routes
 router.get('/categories',getCategories)
