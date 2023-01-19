@@ -119,7 +119,7 @@ class AuthController {
 
       const token = req.cookies.jwtoken;
       if(token){
-        res.clearCookie('jwtoken',{path:'/',domain:'http://localhost:3000'})
+        res.clearCookie('jwtoken')
         return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
       }
       return res.status(400).json({msg:"You haven't loggedin yet",type:"error",status:400})
