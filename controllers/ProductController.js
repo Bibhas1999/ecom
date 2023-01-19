@@ -12,6 +12,7 @@ import Cart from "../models/Cart.js";
 export const getProducts = async (req,res)=>{
    try {
      let products = await Product.find();
+     
      if(products?.length == 0) throw new HTTPError("No Products Found!",404);
      return res.status(201).json({products:products,msg:"Products fetched successfully",status:201,type:"success"});
    } catch (error) {
