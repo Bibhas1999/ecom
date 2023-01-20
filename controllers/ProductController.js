@@ -536,6 +536,7 @@ export const CartList = async (req,res)=>{
     
 
 }
+
 export const addToCart = async (req,res)=>{
     try {
       const {product_id,quantity,price}=req.body
@@ -550,9 +551,7 @@ export const addToCart = async (req,res)=>{
       let product = await Product.findOne({_id:product_id})
       if(!product)throw new HTTPError("No Product Found",404)
       if(product.in_qty < quantity) throw new HTTPError("Not Enough Product in stock!",403)
- 
       if(price !== Math.floor(quantity*product.price)) throw new HTTPError("Price is not set correctly",403)
-     
       let cart = await new Cart({
         product_id:product_id,
         quantity:quantity,
@@ -620,7 +619,11 @@ export const removeFromCart = async (req,res)=>{
       let product = await Product.findOne({_id:cart.product_id})
       let new_in_qty = Math.abs(product.in_qty + cart.quantity)
       let new_out_qty = Math.abs(cart.quantity - product.out_qty)
-      let update_product_quantity = await updateQuantity(cart.product_id,new_in_qty,new_out_qty)  
+      let update_product_quantity = await updateQuantity(cart.product_id,new_in_qty,new_out_qty)
+      if(!update_product_quantity)throw new HTTPError("Something went wrong",500);
+      let deleted = await Cart.deleteOne({_id:id})
+      if(!deleted) throw("Sonthing went wrong")
+      return res.status(200).json({msg:"Product removed from cart successfully",status:200,type:"success"})
     } catch (error) {
         console.log(error)
         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})

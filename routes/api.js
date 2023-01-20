@@ -40,6 +40,7 @@ router.post('/subcategory/create',authCheck,addSubCategory)
 router.put('/subcategory/update',authCheck,updateSubCatgory)
 router.delete('/subcategory/delete',authCheck,deleteSubCategoryware,deleteSubCategory)
 
+//cart routes
 router.get("/cart", CartList)
 router.post("/add-to-cart", addToCart)
 router.put("/update-cart", updateCartQuantity)
