@@ -4,6 +4,8 @@ const productSchema = mongoose.Schema({
     poster:{name:{type:String},file:{type:Buffer},mimeType:{type:String}},
     images:[{name:{type:String},file:{type:Buffer},mimeType:{type:String}}],
     selling_quantity:{type:Number},
+    in_qty:{type:Number},
+    out_qty:{type:Number},
     price:{type:Number,trim:true},
     brand_id: {type: mongoose.Schema.Types.ObjectId, ref: 'brands'},
     desc:{type:String,trime:true},
@@ -16,7 +18,6 @@ const productSchema = mongoose.Schema({
     offers:[{offer_id:{type:String}}],
     rating:{type:String},
     status:{type:Boolean,default:1},
-
 },{
     timestamps:true,
 })

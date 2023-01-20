@@ -57,6 +57,8 @@ export const createProduct = async (req,res) =>{
          poster:poster,
          price:price,
          selling_quantity:selling_quantity,
+         in_qty:selling_quantity,
+         out_qty:0,
          desc:desc,
          brand_id:brand_id,
          attribute:JSON.parse(attribute),
@@ -407,7 +409,7 @@ export const getBrands = async (req,res)=>{
     try {
         let brands = await Brand.find();
         if(brands.length == 0)throw new HTTPError('No Brands Found',404)
-        res.status(201).json({brands:brands,msg:"All brands fetched!", status:201,type:"success"})
+        return res.status(201).json({brands:brands,msg:"All brands fetched!", status:201,type:"success"})
     } catch (error) {
         console.log(error)
         if(error instanceof ValidationError) return res.status(error.statusCode).json({brands:[],msg:error.messege,status:error.statusCode,type:'error'})
@@ -515,10 +517,24 @@ export const deleteBrand = async (req,res)=>{
     
 }
 
-const updateQuantity = async(product_id,quantity)=>{
-  let update = await Product.updateOne({_id:product_id},{$set: {selling_quantity:quantity}})
+const updateQuantity = async(product_id,in_qty,out_qty)=>{
+  let update = await Product.updateOne({_id:product_id},{$set: {in_qty:in_qty,out_qty:out_qty}})
   if(update) return true
   else return false
+}
+
+export const CartList = async (req,res)=>{
+    try {
+        let cart = await Cart.find().populate("product_id")
+        if(cart.length == 0)throw new HTTPError('Cart is empty',404)
+        return res.status(201).json({cart:cart,msg:"Cart data fetched!", status:201,type:"success"})
+    } catch (error) {
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while fetching cart products!",status:500,type:'error'})  
+    }
+    
+
 }
 export const addToCart = async (req,res)=>{
     try {
@@ -533,7 +549,7 @@ export const addToCart = async (req,res)=>{
       if(typeof price !== "number") throw new ValidationError("Price must be a string!")
       let product = await Product.findOne({_id:product_id})
       if(!product)throw new HTTPError("No Product Found",404)
-      if(product.selling_quantity < quantity) throw new HTTPError("Not Enough Product in stock!",403)
+      if(product.in_qty < quantity) throw new HTTPError("Not Enough Product in stock!",403)
  
       if(price !== Math.floor(quantity*product.price)) throw new HTTPError("Price is not set correctly",403)
      
@@ -545,8 +561,9 @@ export const addToCart = async (req,res)=>{
       let saved = await cart.save()
 
       if(!saved) throw("Something went wrong")
-      let new_qty = Math.floor(product.selling_quantity-quantity)
-      let update_quantity = await updateQuantity(product_id,new_qty)
+      let in_qty = Math.floor(product.selling_quantity-quantity)
+      let out_qty = Math.floor(product.selling_quantity-in_qty)
+      let update_quantity = await updateQuantity(product_id,in_qty,out_qty)
       if(!update_quantity)throw new HTTPError("Something went wrong",500)
       return res.status(200).json({msg:"Product added to cart successfully",status:200,type:"success"})
     } catch (error) {
@@ -579,8 +596,9 @@ export const updateCartQuantity = async (req,res)=>{
       if(typeof price != "number") throw new ValidationError('Price must be a number');
       let update_cart = await Cart.updateOne({_id:id},{$set: {quantity:quantity,price:price}}) 
       if(!update_cart) throw HTTPError("Something went wrong while updating",500)
-      let new_quantity = Math.abs(product.selling_quantity - quantity)
-      let update_product_quantity = await updateQuantity(product_id,new_quantity)
+      let new_in_qty = Math.abs(product.selling_quantity - quantity)
+      let new_out_qty = Math.abs(product.selling_quantity - new_in_qty)
+      let update_product_quantity = await updateQuantity(product_id,new_in_qty,new_out_qty)
       if(!update_product_quantity)throw new HTTPError("Something went wrong",500)
       return res.status(200).json({msg:"Cart updated successfully",status:200,type:"success"})
     } catch (error) {
@@ -592,7 +610,11 @@ export const updateCartQuantity = async (req,res)=>{
 }
 
 export const removeFromCart = async (req,res)=>{
-    
+    try {
+        
+    } catch (error) {
+        
+    }
 }
 
 
