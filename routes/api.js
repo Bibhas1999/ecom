@@ -3,7 +3,7 @@ import UserController from '../controllers/UserController.js'
 import AuthController from '../controllers/AuthController.js' 
 import {authCheck,authorized, loggedIn} from '../controllers/middlewares/auth_middleware.js'
 import { getCategoryDetailsware,addCategoryware,updateProductware, updateCategoryware, deleteCategoryware, createProductware,deleteSubCategoryware } from '../controllers/middlewares/product_middleware.js'
-import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, deleteProduct, updateProduct, deleteSubCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory, addSubCategory, addToCart, updateCartQuantity, CartList } from '../controllers/ProductController.js'
+import { getProducts,getProduct,getCategories, getCategory,addCategory,updateCategory, deleteCategory, createProduct, deleteProduct, updateProduct, deleteSubCategory, createAttribute, updateAttribute, deleteAttribute, deleteValuesFromAttribute, getBrands, getBrand, addBrand, updateBrand, deleteBrand, updateSubCatgory, addSubCategory, addToCart, updateCartQuantity, CartList, removeFromCart } from '../controllers/ProductController.js'
 
 const router = express.Router();
 
@@ -43,6 +43,7 @@ router.delete('/subcategory/delete',authCheck,deleteSubCategoryware,deleteSubCat
 router.get("/cart", CartList)
 router.post("/add-to-cart", addToCart)
 router.put("/update-cart", updateCartQuantity)
+router.delete("/remove-from-cart", removeFromCart)
 
 //attribute routes
 // router.post('/attribute/create', authCheck , createAttribute)
