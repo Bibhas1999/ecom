@@ -611,9 +611,21 @@ export const updateCartQuantity = async (req,res)=>{
 
 export const removeFromCart = async (req,res)=>{
     try {
-        
+      const {id} = req.body
+      if(!id) throw new ValidationError("id is required!")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid id');
+      if(typeof id != "string") throw new ValidationError('cart id must be a string');
+      let cart = await Cart.findOne({_id:id})
+      if(!cart) throw HTTPError("Nothing found in cart",500) 
+      let product = await Product.findOne({_id:cart.product_id})
+      let new_in_qty = Math.abs(product.in_qty + cart.quantity)
+      let new_out_qty = Math.abs(cart.quantity - product.out_qty)
+      let update_product_quantity = await updateQuantity(cart.product_id,new_in_qty,new_out_qty)  
     } catch (error) {
-        
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while removing cart item!",status:500,type:'error'})   
     }
 }
 
