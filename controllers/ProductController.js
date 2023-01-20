@@ -530,6 +530,7 @@ export const addToCart = async (req,res)=>{
       if(quantity<=0) throw new ValidationError("Quantity must be greater than 0!")
 
       if(!price) throw new ValidationError("Price is required!")
+      if(typeof price !== "number") throw new ValidationError("Price must be a string!")
       let product = await Product.findOne({_id:product_id})
       if(!product)throw new HTTPError("No Product Found",404)
       if(product.selling_quantity < quantity) throw new HTTPError("Not Enough Product in stock!",403)
@@ -559,14 +560,29 @@ export const addToCart = async (req,res)=>{
 
 export const updateCartQuantity = async (req,res)=>{
     try {
-     const {id,product_id,quantity} = req.body
-     if(!id) throw new ValidationError("Product id is required!")
-      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid product id');
-      if(typeof id != "string") throw new ValidationError('product id must be a string');
+     const {id,product_id,quantity,price} = req.body
+     if(!id) throw new ValidationError("id is required!")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid id');
+      if(typeof id != "string") throw new ValidationError('cart id must be a string');
+      let cart = await Cart.findOne({_id:id})
+      if(!cart) throw HTTPError("Nothing found in cart",500)
       if(!product_id) throw new ValidationError("Product id is required!")
       if(mongoose.isValidObjectId(product_id)==false) throw new ValidationError('Invalid product id');
       if(typeof product_id != "string") throw new ValidationError('product id must be a string');
+      let product = await Product.findOne({_id:product_id})
+      if(!product) throw HTTPError("No Product Found",500)
       if(!quantity) throw new ValidationError("Quantity is required!")
+      if(typeof quantity != "number") throw new ValidationError('quantity must be a number');
+      if(quantity<=0) throw new ValidationError("Quantity must be greater than 0!")
+      if(quantity > product.selling_quantity) throw new HTTPError("Not Enough product in stock!")
+      if(!price) throw new ValidationError("Price is required!")
+      if(typeof price != "number") throw new ValidationError('Price must be a number');
+      let update_cart = await Cart.updateOne({_id:id},{$set: {quantity:quantity,price:price}}) 
+      if(!update_cart) throw HTTPError("Something went wrong while updating",500)
+      let new_quantity = Math.abs(product.selling_quantity - quantity)
+      let update_product_quantity = await updateQuantity(product_id,new_quantity)
+      if(!update_product_quantity)throw new HTTPError("Something went wrong",500)
+      return res.status(200).json({msg:"Cart updated successfully",status:200,type:"success"})
     } catch (error) {
         console.log(error)
         if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
