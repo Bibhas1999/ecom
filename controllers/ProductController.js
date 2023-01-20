@@ -515,11 +515,67 @@ export const deleteBrand = async (req,res)=>{
     
 }
 
-export const addToCart = async ()=>{
-    
+const updateQuantity = async(product_id,quantity)=>{
+  let update = await Product.updateOne({_id:product_id},{$set: {selling_quantity:quantity}})
+  if(update) return true
+  else return false
+}
+export const addToCart = async (req,res)=>{
+    try {
+      const {product_id,quantity,price}=req.body
+      if(!product_id) throw new ValidationError("Product id is required!")
+      if(mongoose.isValidObjectId(product_id)==false) throw new ValidationError('Invalid product id');
+      if(typeof product_id != "string") throw new ValidationError('product id must be a string');
+      if(!quantity) throw new ValidationError("Quantity is required!")
+      if(quantity<=0) throw new ValidationError("Quantity must be greater than 0!")
+
+      if(!price) throw new ValidationError("Price is required!")
+      let product = await Product.findOne({_id:product_id})
+      if(!product)throw new HTTPError("No Product Found",404)
+      if(product.selling_quantity < quantity) throw new HTTPError("Not Enough Product in stock!",403)
+ 
+      if(price !== Math.floor(quantity*product.price)) throw new HTTPError("Price is not set correctly",403)
+     
+      let cart = await new Cart({
+        product_id:product_id,
+        quantity:quantity,
+        price:price
+      })
+      let saved = await cart.save()
+
+      if(!saved) throw("Something went wrong")
+      let new_qty = Math.floor(product.selling_quantity-quantity)
+      let update_quantity = await updateQuantity(product_id,new_qty)
+      if(!update_quantity)throw new HTTPError("Something went wrong",500)
+      return res.status(200).json({msg:"Product added to cart successfully",status:200,type:"success"})
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while adding product to cart!",status:500,type:'error'}) 
+    }
+
 }
 
-export const removeFromCart = async ()=>{
+export const updateCartQuantity = async (req,res)=>{
+    try {
+     const {id,product_id,quantity} = req.body
+     if(!id) throw new ValidationError("Product id is required!")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid product id');
+      if(typeof id != "string") throw new ValidationError('product id must be a string');
+      if(!product_id) throw new ValidationError("Product id is required!")
+      if(mongoose.isValidObjectId(product_id)==false) throw new ValidationError('Invalid product id');
+      if(typeof product_id != "string") throw new ValidationError('product id must be a string');
+      if(!quantity) throw new ValidationError("Quantity is required!")
+    } catch (error) {
+        console.log(error)
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while updating cart!",status:500,type:'error'})  
+    }
+}
+
+export const removeFromCart = async (req,res)=>{
     
 }
 
