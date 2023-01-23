@@ -1,17 +1,17 @@
 import mongoose, { Schema } from "mongoose";
 const orderSchema = mongoose.Schema({
     user_id:{type:mongoose.Schema.Types.ObjectId},
-    products:[
-        {productId :{type:Schema.Types.ObjectId}}
-    ],
+    order_details:{type:Array},
     total:{type:Number,required:true},
+    sub_total:{type:Number},
+    date:{type:Date,required:true},
     discount:{type:Number},
-    desc:{type:String,trime:true},
+    desc:{type:String,trim:true},
     status:{type:Boolean,default:1},
 },{
     timestamps:true,
 })
 
-const orderModel = mongoose.model('orders',orderSchema)
+const Order = mongoose.model('orders',orderSchema)
 
-export default orderModel
+export default Order

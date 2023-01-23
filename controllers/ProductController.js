@@ -61,13 +61,13 @@ export const createProduct = async (req,res) =>{
          out_qty:0,
          desc:desc,
          brand_id:brand_id,
-         attribute:JSON.parse(attribute),
-        //  attribute:attribute,
+        //  attribute:JSON.parse(attribute),
+         attribute:attribute,
          isVarient:isVarient,
          rating:rating,
          reviews:reviews,
-         specifications:JSON.parse(specifications),
-        //  specifications:specifications,
+        //  specifications:JSON.parse(specifications),
+         specifications:specifications,
        })
        let saved = await product.save()
        if(!saved) throw("Something went wrong!")
@@ -631,6 +631,8 @@ export const removeFromCart = async (req,res)=>{
         return res.status(500).json({msg:"Something went wrong while removing cart item!",status:500,type:'error'})   
     }
 }
+
+
 
 
 
