@@ -6,17 +6,36 @@ import mongoose from "mongoose";
 import HTTPError from "../ErrorHandlers/HTTPExceptions.js";
 import ValidationError from "../ErrorHandlers/ValidationExceptions.js";
 class UserController {
-  static getUser = async (req, res) => {
+
+  static getUsers = async (req, res) => {
     try {
       const users = await User.find();
-      if(!users) throw new HTTPError("No Users Found!",404)
-      return res.json({ users: users, msg:"Users fetched", status:200, type:"success" });
+      if(users.length == 0) throw new HTTPError("No Users Found!",404)
+      return res.status(201).json({ users: users, msg:"Users fetched", status:200, type:"success" });
     } catch (error) {
       if(error instanceof ValidationError) return res.status(error.statusCode).json({errors:error},{users:[],msg:error.messege,status:error.statusCode,type:'error'})
-        if(error instanceof HTTPError) return res.status(error.statusCode).json({users:[],msg:error.messege,status:error.statusCode,type:'error'})
-        return res.status(500).json({users:[],msg:"Something went wrong!",status:500,type:'error'}) 
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({users:[],msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({users:[],msg:"Something went wrong!",status:500,type:'error'}) 
     }
   };
+
+  static getUser = async (req,res)=>{
+    try {
+      const {id} = req.body
+      if(!id) throw new ValidationError("user id is required!")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid id');
+      if(typeof id != "string") throw new ValidationError('user id must be a string');
+      let user = await User.findOne({_id:id})
+      if(!user) throw HTTPError("No User Found!",500)
+      return res.status(201).json({ user: user, msg:"User Fetched", status:201, type:"success" })
+    } catch (error) {
+      if(error instanceof ValidationError) return res.status(error.statusCode).json({errors:error},{user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({user:{},msg:"Something went wrong!",status:500,type:'error'}) 
+    }
+  }
+
+
 
   static addUser = async (req, res) => {
     try {
@@ -24,6 +43,7 @@ class UserController {
       if(!name)throw new ValidationError("username is required!")
       if(!email)throw new ValidationError("email is required!")
       if(!password)throw new ValidationError("password is required!")
+      
       const result = await User.findOne({ email: email });
       if (!result) {
         let hashedPassword = bcrypt.hashSync(password, 10);
@@ -37,49 +57,54 @@ class UserController {
       }
       return res.json({ msg: "Email already exists", status: 400,type:"error" });
     } catch (error) {
-      return res.send({ error: error, msg:"Something went wrong", status: 500, type:"error" });
+      if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({user:{},msg:"Something went wrong!",status:500,type:'error'}) 
     }
   };
 
-  static editUser = async (req, res) => {
-    try {
-      const { id } = req.params;
-      if(mongoose.isValidObjectId(id)==false) return res.status(400).json({msg:"Invalid user id",status:400,type:"error"})
-      const user = await User.findOne({ _id: id });
-      if (user) {
-        console.log(user._id);
-        const filtered = {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          active: user.active,
-        };
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        return res.send({ user: filtered, status: "200 ok" });
-      }
-      return res.send({ msg: "User Not Found", status: "400 Not Found" });
-    } catch (error) {
-      console.log(error);
-      return res.send({ error: error, status: "500" });
-    }
-  };
 
   static updateUser = async (req, res) => {
     try {
       const { id, name, email } = req.body;
-      const user = await User.findOne({ email: email });
-      console.log(user);
+      if(!id) throw new ValidationError("id is required!")
+      if(mongoose.isValidObjectId(id)==false) throw new ValidationError('Invalid id');
+      if(typeof id != "string") throw new ValidationError('user id must be a string');
+      const user = await User.findOne({ _id:id });
       if (user) {
-        await UserModel.updateOne({ name: name, email: email });
+        await User.updateOne({ name: name, email: email });
         return res.send({ msg: "User Updated Successfully", status: "200 ok" });
       } else {
         return res.send({ msg: "User Not Found", status: "400 Not Found" });
       }
     } catch (error) {
-      return res.send({ error: error, status: "500" });
+      if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({user:{},msg:"Something went wrong!",status:500,type:'error'}) 
     }
   };
 
+static changePassword = async (req,res)=>{
+  try {
+    const {email,curr_password,new_password,retyped} = req.body
+    if(!email)throw new ValidationError("Email is required")
+    if(!curr_password)throw new ValidationError("Password is required")
+    if(!new_password)throw new ValidationError("Please provide new password")
+    if(!retyped)throw new ValidationError("Please retype your new password")
+    if(new_password !== retyped) throw new ValidationError("password and confirm password doesn't match")
+    let user = await User.findOne({email:email})
+    if(!user)throw new HTTPError("No user found!",404)
+    if(!bcrypt.compareSync(curr_password,user.password)) throw new HTTPError("Your current password is wrong!")
+    let hashed = bcrypt.hashSync(new_password,10)
+    
+    
+  } catch (error) {
+    if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      return res.status(500).json({user:{},msg:"Something went wrong!",status:500,type:'error'}) 
+  }
+  
+}  
   static uploadPic = async (req, res) => {
     
   };
