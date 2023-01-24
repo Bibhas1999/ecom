@@ -51,7 +51,6 @@ export const createProduct = async (req,res) =>{
             mimeType:req.files.image.mimeType
            }
        }       
-      
        let product = new Product({
          name:name,
          poster:poster,
@@ -514,7 +513,7 @@ export const deleteBrand = async (req,res)=>{
         if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
         return res.status(500).json({msg:"Something went wrong while deleting brand!",status:500,type:'error'})  
     }
-    
+   
 }
 
 const updateQuantity = async(product_id,in_qty,out_qty)=>{
@@ -545,7 +544,6 @@ export const addToCart = async (req,res)=>{
       if(typeof product_id != "string") throw new ValidationError('product id must be a string');
       if(!quantity) throw new ValidationError("Quantity is required!")
       if(quantity<=0) throw new ValidationError("Quantity must be greater than 0!")
-
       if(!price) throw new ValidationError("Price is required!")
       if(typeof price !== "number") throw new ValidationError("Price must be a string!")
       let product = await Product.findOne({_id:product_id})
@@ -558,10 +556,9 @@ export const addToCart = async (req,res)=>{
         price:price
       })
       let saved = await cart.save()
-
       if(!saved) throw("Something went wrong")
-      let in_qty = Math.floor(product.selling_quantity-quantity)
-      let out_qty = Math.floor(product.selling_quantity-in_qty)
+      let in_qty = Math.abs(product.selling_quantity-quantity)
+      let out_qty = Math.abs(product.selling_quantity-in_qty)
       let update_quantity = await updateQuantity(product_id,in_qty,out_qty)
       if(!update_quantity)throw new HTTPError("Something went wrong",500)
       return res.status(200).json({msg:"Product added to cart successfully",status:200,type:"success"})
