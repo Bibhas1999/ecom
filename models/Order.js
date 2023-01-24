@@ -7,7 +7,7 @@ const orderSchema = mongoose.Schema({
     date:{type:Date,required:true},
     discount:{type:Number},
     desc:{type:String,trim:true},
-    status:{type:Boolean,default:1},
+    status:{type:String,enum : ['Placed','Shipped','Delivered','Pending'],default:'Pending'},
 },{
     timestamps:true,
 })

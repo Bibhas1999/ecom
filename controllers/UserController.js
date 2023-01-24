@@ -29,7 +29,7 @@ class UserController {
       if(!user) throw HTTPError("No User Found!",500)
       return res.status(201).json({ user: user, msg:"User Fetched", status:201, type:"success" })
     } catch (error) {
-      if(error instanceof ValidationError) return res.status(error.statusCode).json({errors:error},{user:{},msg:error.messege,status:error.statusCode,type:'error'})
+      if(error instanceof ValidationError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       if(error instanceof HTTPError) return res.status(error.statusCode).json({user:{},msg:error.messege,status:error.statusCode,type:'error'})
       return res.status(500).json({user:{},msg:"Something went wrong!",status:500,type:'error'}) 
     }

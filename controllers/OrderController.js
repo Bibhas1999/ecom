@@ -51,7 +51,7 @@ export const createOrder = async (req,res)=>{
     })
     let saved = await order.save()
     if(!saved)throw("Something went wrong")
-    
+
     return res.status(201).json({msg:"Order Created Successfully",status:201,type:"success"})
    } catch (error) {
       if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
@@ -66,7 +66,7 @@ export const updateOrder = async ()=>{
     
 }
 
-export const updateOrderStatus = async ()=>{
+export const updateOrderStatus = async (req,res)=>{
     
 }
 
