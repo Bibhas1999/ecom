@@ -72,7 +72,7 @@ class UserController {
       if(typeof id != "string") throw new ValidationError('user id must be a string');
       const user = await User.findOne({ _id:id });
       if(!user) throw new HTTPError("No User Found!",404)
-      let update = await User.updateOne({email: email },{name:name,mobile:mobile, address:address});
+      let update = await User.updateOne({_id: id },{$set:{name:name,mobile:mobile,address:address}});
       if(!update) throw('Something went wrong')
       return res.json({msg:"Profile Updated Successfully",status:201,type:"success"})
     } catch (error) {
