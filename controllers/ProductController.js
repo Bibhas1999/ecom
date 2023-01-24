@@ -547,13 +547,30 @@ export const addToCart = async (req,res)=>{
       if(!product.hasOwnProperty("product_id") && typeof product.product_id == "undefined") throw new ValidationError("Product id is required")
       if(!product.hasOwnProperty("quantity") && typeof product.quantiy == "undefined") throw new ValidationError("Quantity is required")
       if(!product.hasOwnProperty("price") && typeof product.price == "undefined") throw new ValidationError("Price is required")
-      let find_cart = await Cart.findOne({user_id:user_id});
-      if(!find_cart){
+      let products = []
+      let product_exists = await Product.findOne({_id:product.id})
+      if(!product_exists) throw new HTTPError("Product Not Found!",500)
+      
+      products.push(product)
+      let cart = await Cart.findOne({user_id:user_id});
+      if(!cart){
         let cart = await new Cart({
             user_id:user_id,
-            product:product,
-            total
+            products:products,
+            total_price:total_price,
+            total_qty:total_qty,
         })
+        let save = await cart.save()
+        if(!save) throw new HTTPError("Something went wrong while adding to cart")
+        return res.status(200).json({msg:"Product Added to Cart!", status:200,type:"success"})
+      }else{
+         let product_exists = cart.products.filter(p => p.product_id == product.product_id)
+         if(product_exists){
+            
+         }else{
+
+         }
+
       }
     //   let product = await Product.findOne({_id:product_id})
     //   if(!product)throw new HTTPError("No Product Found",404)

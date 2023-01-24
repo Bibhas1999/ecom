@@ -108,7 +108,7 @@ static changePassword = async (req,res)=>{
     try {
       const {user_id} = req.body 
       let profile_pic = {}
-      if(!user_id) throw new ValidationError("Unauthenticated")
+      // if(!user_id) throw new ValidationError("Unauthenticated")
       let user = await User.findOne({_id:user_id})
       if(!user) throw new HTTPError("User Not Found",404)
       if(req.files){
