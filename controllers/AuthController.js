@@ -116,16 +116,18 @@ class AuthController {
   };
 
   static logout = async (req,res)=>{
-
-      const token = await req.cookies.jwtoken;
-      console.log(token)
-      if(token){
-       let clear = await res.clearCookie('jwtoken')
-       console.log(clear)
-       if(clear) return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
-       return res.status(500).json({msg:"Something went wrong while signing out",type:"error",status:500})
+      try {
+        const token = await req.cookies.jwtoken;
+        if(!token) throw new HTTPError("You haven't loggedin yet",400)
+        let clear = await res.clearCookie('jwtoken',{path:'/'}) 
+        if(!clear)throw new HTTPError("Something went wrong while clearning cookies!",500)
+        return res.status(200).json({msg:"You have been logged out",type:"success",status:200})
+      } catch (error) {
+        console.log(error);
+        if(error instanceof ValidationError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        if(error instanceof HTTPError) return res.status(error.statusCode).json({msg:error.messege,status:error.statusCode,type:'error'})
+        return res.status(500).json({msg:"Something went wrong while logging out!",status:500,type:'error'}) 
       }
-      return res.status(400).json({msg:"You haven't loggedin yet",type:"error",status:400})
   }
 
  static verifyAccount = async (req,res)=>{
