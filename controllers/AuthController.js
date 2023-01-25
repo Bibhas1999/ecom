@@ -26,13 +26,13 @@ class AuthController {
           if(!user.verified) throw new HTTPError('Your account is not verified.Please verify your account to login',401) 
             const id = user._id
             const token = jwt.sign({id},process.env.JWT_SECRET_KEY)
-            // var oneWeek = 7 * 24 * 3600 * 1000
-            //  res.cookie("jwtoken",token,{
-            //   expires: new Date(Date.now() + oneWeek),
-            //   httpOnly:true,
-            //   sameSite:'none',
-            //   secure:true
-            //  })
+            var oneWeek = 7 * 24 * 3600 * 1000
+             res.cookie("jwtoken",token,{
+              expires: new Date(Date.now() + oneWeek),
+              httpOnly:true,
+              sameSite:'none',
+              secure:true
+             })
             return res.status(200).json({
               msg:'Login Successful',
               user:{
@@ -40,7 +40,6 @@ class AuthController {
                 name: user.name,
                 email: user.email,  
               },
-              jwtoken:token,
               status: 200,
               type:'success'
           });
@@ -73,7 +72,8 @@ class AuthController {
         if (!result) {
           let otp = generateOtp()
           let hashedPassword = bcrypt.hashSync(password, 10);
-          // let hashedOTP = bcrypt.hashSync(String(otp), 10);  
+          // let hashedOTP = bcrypt.hashSync(String(otp), 10);
+          
           let sent = await sendVerificationEmail(email,otp)
           console.log(sent.messageId)
           if(!sent.messageId) throw new HTTPError("Internal Server Error",500)
@@ -87,7 +87,18 @@ class AuthController {
           
           let saved = await user.save();
           if(!saved) throw("Somthing went wrong")
-      
+
+        //   const id = user._id
+        //   const token = jwt.sign({id},process.env.JWT_SECRET_KEY,{
+        //     expiresIn:'2h'
+        //  })
+        //  var oneWeek = 7 * 24 * 3600 * 1000
+        //  res.cookie("jwtoken",token,{
+        //   expires: new Date(Date.now() + oneWeek),
+        //   httpOnly:true,
+        //   sameSite:'none',
+        //   secure:true
+        //  })       
           return res.status(200).json({ msg: "Registration Successfull. An OTP has been sent to your email address for verification.",user:{
             _id: user._id,
             name: user.name,
