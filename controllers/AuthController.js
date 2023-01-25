@@ -73,8 +73,7 @@ class AuthController {
         if (!result) {
           let otp = generateOtp()
           let hashedPassword = bcrypt.hashSync(password, 10);
-          // let hashedOTP = bcrypt.hashSync(String(otp), 10);
-          
+          // let hashedOTP = bcrypt.hashSync(String(otp), 10);  
           let sent = await sendVerificationEmail(email,otp)
           console.log(sent.messageId)
           if(!sent.messageId) throw new HTTPError("Internal Server Error",500)
